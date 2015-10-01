@@ -149,7 +149,7 @@ public abstract class AbstractReader {
             if (!p.isEmpty())
                 pathBuilder.append("/").append(p);
         }
-        operationPath = pathBuilder.toString();
+        operationPath = operationPath.endsWith("/") ? pathBuilder.toString() + "/" : pathBuilder.toString();
         return operationPath;
     }
 
