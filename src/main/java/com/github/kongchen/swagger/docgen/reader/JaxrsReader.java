@@ -186,10 +186,8 @@ public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
         String output = b.toString();
         if (!output.startsWith("/"))
             output = "/" + output;
-        if (output.endsWith("/") && output.length() > 1)
-            return output.substring(0, output.length() - 1);
-        else
-            return output;
+
+        return output;
     }
 
 
