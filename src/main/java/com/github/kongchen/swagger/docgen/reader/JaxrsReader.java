@@ -36,7 +36,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 
 import org.slf4j.Logger;
@@ -66,24 +66,29 @@ public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
         return this.swagger;
     }
     
+    /**
+     * Sort the methods, put the get multiple methods (for example, getAll) to the end. 
+     * @param methods
+     * @return
+     */
     public Method[] sortMethod(Method[] methods) {
         if (methods == null) {
             return null;
         }
     	List<Method> allMethods = new ArrayList<Method>();
-    	List<Method> postMethods = new ArrayList<Method>();
+    	List<Method> listMethods = new ArrayList<Method>();
     	for (Method m : methods) {
     		ApiOperation apiOperation = m.getAnnotation(ApiOperation.class);
-    		POST post = m.getAnnotation(POST.class);
-    		if ((apiOperation != null && "POST".equalsIgnoreCase(apiOperation.httpMethod())) || post != null) {
-    			postMethods.add(m);
+    		if (apiOperation != null && apiOperation.responseContainer() != null ) {
+    			listMethods.add(m);
     		} else {
     			allMethods.add(m);
     		}
     	}
     	
-    	for (Method m : postMethods) {
-    		allMethods.add(0, m);
+    	// put the list methods to the end of the list.
+    	for (Method m : listMethods) {
+    		allMethods.add(m);
     	}
     	return allMethods.toArray(new Method[allMethods.size()]);
     }
