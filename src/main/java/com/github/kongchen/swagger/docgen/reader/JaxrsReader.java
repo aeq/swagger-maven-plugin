@@ -1,7 +1,5 @@
 package com.github.kongchen.swagger.docgen.reader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kongchen.swagger.docgen.LogAdapter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -11,7 +9,6 @@ import io.swagger.annotations.AuthorizationScope;
 import io.swagger.converter.ModelConverters;
 import io.swagger.jaxrs.ext.SwaggerExtension;
 import io.swagger.jaxrs.ext.SwaggerExtensions;
-import io.swagger.jaxrs.utils.ReflectionUtils;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
 import io.swagger.models.Response;
@@ -25,12 +22,7 @@ import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.util.Json;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.Produces;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -41,6 +33,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kongchen.swagger.docgen.LogAdapter;
 
 public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
     Logger LOGGER = LoggerFactory.getLogger(JaxrsReader.class);
@@ -61,6 +64,28 @@ public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
 
     public Swagger getSwagger() {
         return this.swagger;
+    }
+    
+    public Method[] sortMethod(Method[] methods) {
+        if (methods == null) {
+            return null;
+        }
+    	List<Method> allMethods = new ArrayList<Method>();
+    	List<Method> postMethods = new ArrayList<Method>();
+    	for (Method m : methods) {
+    		ApiOperation apiOperation = m.getAnnotation(ApiOperation.class);
+    		POST post = m.getAnnotation(POST.class);
+    		if ((apiOperation != null && "POST".equalsIgnoreCase(apiOperation.httpMethod())) || post != null) {
+    			postMethods.add(m);
+    		} else {
+    			allMethods.add(m);
+    		}
+    	}
+    	
+    	for (Method m : postMethods) {
+    		allMethods.add(0, m);
+    	}
+    	return allMethods.toArray(new Method[allMethods.size()]);
     }
 
     public Swagger read(Class cls) {
@@ -91,7 +116,7 @@ public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
         // handle subresources by looking at return type
 
         // parse the method
-        Method methods[] = cls.getMethods();
+        Method methods[] = sortMethod(cls.getMethods());
         for (Method method : methods) {
 
             ApiOperation apiOperation = method.getAnnotation(ApiOperation.class);
