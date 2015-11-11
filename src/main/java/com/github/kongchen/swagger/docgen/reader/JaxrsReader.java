@@ -37,6 +37,7 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 
 import org.slf4j.Logger;
@@ -80,9 +81,12 @@ public class JaxrsReader extends AbstractReader implements ClassSwaggerReader {
         for (Method m : methods) {
             ApiOperation apiOperation = m.getAnnotation(ApiOperation.class);
             POST post = m.getAnnotation(POST.class);
+            PUT put = m.getAnnotation(PUT.class);
             if ((apiOperation != null && "POST".equalsIgnoreCase(apiOperation.httpMethod())) || post != null) {
                 postMethods.add(m);
-            } else {
+            } else if((apiOperation != null && "PUT".equalsIgnoreCase(apiOperation.httpMethod())) || put != null) {
+            	postMethods.add(m);
+            }else {
                 allMethods.add(m);
             }
         }
