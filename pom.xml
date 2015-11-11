@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.aeq</groupId>
     <artifactId>swagger-maven-plugin</artifactId>
-    <version>fincad-0.0.8</version>
+    <version>fincad-0.0.10</version>
     <packaging>maven-plugin</packaging>
     <name>Swagger Maven Plugin</name>
     <description>
