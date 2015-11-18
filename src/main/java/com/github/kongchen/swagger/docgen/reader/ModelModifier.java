@@ -1,5 +1,6 @@
 package com.github.kongchen.swagger.docgen.reader;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kongchen.swagger.docgen.GenerateException;
@@ -57,7 +58,22 @@ public class ModelModifier extends ModelResolver {
         if(modelSubtitutes.containsKey(type)) {
             return super.resolveProperty(modelSubtitutes.get(type), context, annotations, chain);
         } else {
-            return super.resolveProperty(type, context, annotations, chain);
+            Property ret = super.resolveProperty(type, context, annotations, chain);
+            resolveJsonProperty(ret, type, context, annotations, chain);
+            return ret;
+        }
+
+    }
+
+    protected void resolveJsonProperty(Property property, Type type, ModelConverterContext context, Annotation[] annotations, Iterator<ModelConverter> chain) {
+        if (property == null || annotations == null) {
+            return;
+        }
+        for (Annotation annotation : annotations) {
+            if ("com.fasterxml.jackson.annotation.JsonProperty".equals(annotation.annotationType().getName())) {
+                JsonProperty jsonPropertyAnnotation = (JsonProperty)annotation;
+                property.setTitle(jsonPropertyAnnotation.value());
+            }
         }
 
     }
